@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:the_cats_shop_app/cubits/cats_cubit/cats_cubit.dart';
 import 'package:the_cats_shop_app/cubits/cats_cubit/cats_state.dart';
+import 'package:the_cats_shop_app/cubits/favorite_cubit/favorite_cubit.dart';
+import 'package:the_cats_shop_app/cubits/favorite_cubit/favorite_state.dart';
+import 'package:the_cats_shop_app/cubits/get_favorites_cubit/get_favorites_cubit.dart';
+import 'package:the_cats_shop_app/cubits/get_favorites_cubit/get_favorites_state.dart';
 import 'package:the_cats_shop_app/models/cat_model.dart';
 
 class HomePage extends StatelessWidget {
@@ -11,97 +15,119 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'The Cat Shop',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: SingleChildScrollView(
-          child: BlocBuilder<CatsCubit, CatsState>(builder: (context, state) {
-            return Column(
-              children: [
-                if (state is CatsLoaded)
-                  ...List<CatModel>.from(state.cats!)
-                      .map(
-                        (cat) => Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    CircleAvatar(
-                                      backgroundColor: Colors.blue[900],
-                                      child: Icon(
-                                        Icons.person,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text(
-                                      'Mr. Wahid',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // IconButton(
-                                //   onPressed: () {},
-                                //   icon: Icon(
-                                //     Icons.favorite_border,
-                                //     color: Colors.redAccent,
-                                //   ),
-                                // ),
-                              ],
-                            ),
-                            Container(
-                              width: MediaQuery.of(context).size.width,
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 16,
+    context.read<CatsCubit>().getCats();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: SingleChildScrollView(
+        child: BlocBuilder<CatsCubit, CatsState>(builder: (context, catsState) {
+          return Column(
+            children: [
+              if (catsState is CatsLoaded)
+                ...List<CatModel>.from(catsState.cats!)
+                    .map(
+                      (cat) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              IconButton(
+                                onPressed: () {},
+                                icon: Icon(Icons.payment),
                               ),
-                              child: ClipRRect(
-                                clipBehavior: Clip.antiAlias,
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  cat.url,
-                                  height: 200,
-                                  width: MediaQuery.of(context).size.width,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            Divider(
-                              color: Colors.blue.withOpacity(.3),
-                            ),
-                          ],
-                        ),
-                      )
-                      .toList()
-                else if (state is CatsError)
-                  Text(state.errorMessage!)
-                else
-                  const Center(
-                    child: const CircularProgressIndicator(),
-                  ),
+                              // Row(
+                              //   children: [
+                              // CircleAvatar(
+                              //   backgroundColor: Colors.blue[900],
+                              //   child: Icon(
+                              //     Icons.person,
+                              //     color: Colors.white,
+                              //   ),
+                              // ),
+                              // SizedBox(
+                              //   width: 10,
+                              // ),
+                              // Text(
+                              //   'Mr. Wahid',
+                              //   style: TextStyle(
+                              //     fontWeight: FontWeight.bold,
+                              //   ),
+                              // ),
+                              //   ],
+                              // ),
+                              BlocBuilder<FavoriteCubit, FavoriteState>(
+                                builder: (context, favoriteState) {
+                                  return BlocBuilder<GetFavoritesCubit,
+                                      GetFavoritesState>(
+                                    builder: (context, getFavoriteState) {
+                                      bool isFaved = false;
 
-                // else if (catsState is CatsFailure)
-                //   Center(child: Text(catsState.errorMessage!))
-                // else
-                //   Center(child: CircularProgressIndicator())
-              ],
-            );
-          }),
-        ),
+                                      if (getFavoriteState is FavoritesLoaded) {
+                                        isFaved = getFavoriteState.urls!
+                                            .contains(cat.url);
+                                      }
+
+                                      context
+                                          .read<GetFavoritesCubit>()
+                                          .getFavorites();
+
+                                      return IconButton(
+                                        onPressed: () {
+                                          context
+                                              .read<FavoriteCubit>()
+                                              .favorite(url: cat.url);
+                                        },
+                                        icon: Icon(
+                                          isFaved
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                          color: Colors.redAccent,
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width,
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            child: ClipRRect(
+                              clipBehavior: Clip.antiAlias,
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                cat.url,
+                                height: 200,
+                                width: MediaQuery.of(context).size.width,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Divider(
+                            color: Colors.blue.withOpacity(.3),
+                          ),
+                        ],
+                      ),
+                    )
+                    .toList()
+              else if (catsState is CatsError)
+                Text(catsState.errorMessage!)
+              else
+                const Center(
+                  child: const CircularProgressIndicator(),
+                ),
+
+              // else if (catsState is CatsFailure)
+              //   Center(child: Text(catsState.errorMessage!))
+              // else
+              //   Center(child: CircularProgressIndicator())
+            ],
+          );
+        }),
       ),
     );
   }

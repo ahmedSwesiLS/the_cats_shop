@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "216260957858",
+    "project_id": "catsshop",
+    "storage_bucket": "catsshop.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:216260957858:android:1415e7f4da6e5c68a029fb",
+        "android_client_info": {
+          "package_name": "com.example.the_cats_shop_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD04_GnHxU27t9ONMZQkJzN5UPSjtx1Bbc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
